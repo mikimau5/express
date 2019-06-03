@@ -3,24 +3,36 @@
 // npm install
 // SET DEBUG=Projekt serwisu:*
 // npm start
-// node .bin/www
+// nodemon bin/www
 
 // git init
 // git remote add origin https://github.com/mikimau5/express.git
 // git push -u origin master
 
+// npm install cookie-session
+
+// npm install mongoose
+
 
 var createError = require('http-errors');
+var cookieSession = require('cookie-session')
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var config = require('./config')
+var mongoose = require('mongoose')
+mongoose.connect(config.db, {
+  useNewUrlParser: true
+});
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
 
 var indexRouter = require('./routes/index');
 var newsRouter = require('./routes/news');
 var quizRouter = require('./routes/quiz');
 var adminRouter = require('./routes/admin');
-
 
 var app = express();
 
@@ -35,6 +47,12 @@ app.use(express.urlencoded({
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(cookieSession({
+  name: 'session',
+  keys: config.keySession,
+  maxAge: config.maxAgeSession
+}))
 
 app.use(function (req, res, next) {
   res.locals.path = req.path
